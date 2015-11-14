@@ -1,0 +1,12 @@
+/* 
+    Created on : Nov 14, 2015, 9:42:19 AM
+    Author     : andrey
+*/
+
+#menu{
+	border-right: 1px solid #ffb400;
+	height:100vh;
+	float:left;
+	width:12%;
+        min-width: 100px;
+}
