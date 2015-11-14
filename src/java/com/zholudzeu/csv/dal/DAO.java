@@ -5,16 +5,12 @@
  */
 package com.zholudzeu.csv.dal;
 
-import java.util.LinkedList;
 import java.io.File;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Connection;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.ClientJDBCObjectFactory;
 
 /**
  *
@@ -23,6 +19,8 @@ import org.apache.derby.client.am.ClientJDBCObjectFactory;
 public abstract class DAO {
     private static final String DB_URL = 
             "jdbc:derby://localhost:1527/CsvDb;create=true";
+    private static final String DERBY_DRIVER =
+            "org.apache.derby.jdbc.ClientDriver";
     
     private static PreparedStatement createStatement;
     private static PreparedStatement readStatement;
@@ -33,11 +31,13 @@ public abstract class DAO {
     
     public static synchronized void loadCsvFile(File file) {
         try {
-            Class.forName("org.apache.derby.jdbc.ClientDriver");
+            //Class.forName(DERBY_DRIVER);
+            DriverManager.registerDriver(
+                    new org.apache.derby.jdbc.ClientDriver());
             dbconn = DriverManager.getConnection(DB_URL);
             FileParser parser = new FileParser(dbconn);
             parser.parse(file);
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             System.err.print(e.getMessage());
         } finally {
             DbUtils.closeQuietly(dbconn);
