@@ -42,7 +42,7 @@ public abstract class DAO {
     }
     
     /**
-     * Preparations to parse the file
+     * Preparations to parse the file.
      * @param file File to process.
      */
     public static synchronized void loadCsvFile(File file) {
@@ -69,25 +69,13 @@ public abstract class DAO {
         try {
             // Get string, representing the ordering.
             String part;
-            switch (orderBy) {
-                case 2: part = "ID DESC";break;
-                case 3: part = "NAME ASC";break;
-                case 4: part = "NAME DESC";break;
-                case 5: part = "SURNAME ASC";break;
-                case 6: part = "SURNAME DESC";break;
-                case 7: part = "LOGIN ASC";break;
-                case 8: part = "LOGIN DESC";break;
-                case 9: part = "EMAIL ASC";break;
-                case 10: part = "EMAIL DESC";break;
-                case 11: part = "PHONENUMBER ASC";break;
-                case 12: part = "PHONENUMBER DESC";break;
-                default: part = "ID ASC";break;                
-            }
+            
             dbconn = DriverManager.getConnection(DB_URL);
             // Complete the query to the DB.
             readStmt = dbconn.prepareStatement(
-                    "SELECT * FROM APP.USERS ORDER BY " + part
-                  + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+                    "SELECT * FROM APP.USERS ORDER BY " + 
+                    getOrderingString(orderBy) +
+                    " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
             //readStmt.setMaxRows(recordsByPage);
             readStmt.setInt(1, (page - 1) * recordsByPage);
             readStmt.setInt(2, recordsByPage);
@@ -97,13 +85,7 @@ public abstract class DAO {
             ArrayList<User> list = new ArrayList();
             User user;
             while (results.next()) {
-                user = new User(results.getInt("ID"), 
-                        results.getString("NAME"),
-                        results.getString("SURNAME"),
-                        results.getString("LOGIN"),
-                        results.getString("EMAIL"),
-                        results.getString("PHONENUMBER"));
-                list.add(user);
+                list.add(parseResults(results));
             }
             return list;
         } catch (SQLException e) {
@@ -114,6 +96,44 @@ public abstract class DAO {
             DbUtils.closeQuietly(results);
         }
         return null;
+    }
+    
+    /**
+     * Get part of query, responsible for ordering.
+     * @param orderBy Number, that represents ordering.
+     * @return Part of query, responsible for irdering.
+     */
+    protected static String getOrderingString(int orderBy) {
+        switch (orderBy) {
+            case 2: return "ID DESC";
+            case 3: return "NAME ASC";
+            case 4: return "NAME DESC";
+            case 5: return "SURNAME ASC";
+            case 6: return "SURNAME DESC";
+            case 7: return "LOGIN ASC";
+            case 8: return "LOGIN DESC";
+            case 9: return "EMAIL ASC";
+            case 10: return "EMAIL DESC";
+            case 11: return "PHONENUMBER ASC";
+            case 12: return "PHONENUMBER DESC";
+            default: return "ID ASC";                
+        }
+    }
+    
+    /**
+     * Parse ResultSet into User object.
+     * @param results ResultSet to parse.
+     * @return User object.
+     * @throws SQLException When ResultSet doesn't hold User data. 
+     */
+    protected static User parseResults(ResultSet results) 
+            throws SQLException {
+        return new User(results.getInt("ID"), 
+                results.getString("NAME"),
+                results.getString("SURNAME"),
+                results.getString("LOGIN"),
+                results.getString("EMAIL"),
+                results.getString("PHONENUMBER"));
     }
     
     /**
