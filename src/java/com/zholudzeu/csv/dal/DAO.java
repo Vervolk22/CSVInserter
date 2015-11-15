@@ -23,6 +23,7 @@ public abstract class DAO {
             "jdbc:derby://localhost:1527/CsvDb;create=true";
     
     private static PreparedStatement readStmt;
+    private static PreparedStatement countStmt;
     private static ResultSet results;
     
     private static Connection dbconn;
@@ -95,5 +96,26 @@ public abstract class DAO {
             DbUtils.closeQuietly(results);
         }
         return null;
+    }
+    
+    public static int getRecordsCount() {
+        try {
+            dbconn = DriverManager.getConnection(DB_URL);
+            readStmt = dbconn.prepareStatement(
+                    "SELECT COUNT(ID) FROM APP.USERS");
+            results = readStmt.executeQuery();
+            int count = 0;
+            while (results.next()) {
+                count = results.getInt(1);
+            }
+            return count;
+        } catch (SQLException e) {
+            System.err.print(e.getMessage());
+            } finally {
+            DbUtils.closeQuietly(dbconn);
+            DbUtils.closeQuietly(readStmt);
+            DbUtils.closeQuietly(results);
+        }
+        return 0;
     }
 }

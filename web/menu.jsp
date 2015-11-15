@@ -5,6 +5,6 @@
 --%>
 
 <div>
-    <a href="list.jsp">View records</a><p/>
+    <a href="ViewRecordsServlet">View records</a><p/>
     <a href="import.jsp">Import records</a>
 </div>

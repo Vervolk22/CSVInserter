@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.zholudzeu.csv.dal.DAO;
 import com.zholudzeu.csv.dal.User;
+import javax.servlet.RequestDispatcher;
 
 /**
  *
@@ -24,7 +25,7 @@ import com.zholudzeu.csv.dal.User;
 @WebServlet(name = "ViewRecordsServlet", urlPatterns = {"/ViewRecordsServlet"})
 public class ViewRecordsServlet extends HttpServlet {
 
-    private static final int RECORDS_BY_PAGE = 30;
+    private static final int RECORDS_BY_PAGE = 5;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -37,26 +38,55 @@ public class ViewRecordsServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, 
             HttpServletResponse response, int page, int orderBy)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            ArrayList<User> list = DAO.getRecords(page, RECORDS_BY_PAGE, orderBy);
-            for(User usr : list) {
-                out.println("<div>");
-                out.println(usr.id + " " + usr.name + " " + usr.surname + 
-                        " " + usr.login + " " + usr.email + " " +
-                        usr.phoneNumber);
-                out.println("</div>");
-            }
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ViewRecordsServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ViewRecordsServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        String s = "<div> <table> <tr>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 1) + "\">Id</a></td>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 3) + "\">Name</a></td>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 5) + "\">Surname</a></td>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 7) + "\">Login</a></td>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 9) + "\">Email</a></td>";
+        s += "<td><a href=\"ViewRecordsServlet?page=" + page + 
+                "&orderBy=" + (orderBy % 2 + 11) + "\">Phone number</a></td>";
+        
+        s += "</tr>";
+        ArrayList<User> list = DAO.getRecords(page, RECORDS_BY_PAGE, orderBy);
+        for(User usr : list) {
+            s += "<tr>";
+            s += "<td>" + usr.id + "</td><td>" + usr.name + "</td><td>" + 
+                    usr.surname + "</td><td>" + usr.login + "</td><td>" + 
+                    usr.email + "</td><td>" + usr.phoneNumber;
+            s += "</tr>";
         }
+        s += "</table><br/>";
+        s += "<div class=\"navigator\"> ";
+        s += createNavigator(page, orderBy);
+        s += "</div></div>";
+            
+        request.setAttribute("users_table", s);
+        RequestDispatcher rd = request.getRequestDispatcher("list.jsp");
+        rd.forward(request, response);
+    }
+    
+    protected String createNavigator(int page, int orderBy) {
+        String s = "";
+        int count = DAO.getRecordsCount();
+        int pages = ((count - 1) / RECORDS_BY_PAGE) + 1;
+        int pos1 = page - 5 < 1 ? 1 : page - 5;
+        int pos2 = page + 5 > pages ? pages : page + 5;
+        for (int i = pos1; i < page; i++) {
+            s += "<a href=\"ViewRecordsServlet?page=" + i + 
+                "&orderBy=" + orderBy + "\"> " + i + " </a>";
+        }
+        s += " " + page + " ";
+        for (int i = page + 1; i <= pos2; i++) {
+            s += "<a href=\"ViewRecordsServlet?page=" + i + 
+                "&orderBy=" + orderBy + "\"> " + i + " </a>";
+        }
+        return s;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

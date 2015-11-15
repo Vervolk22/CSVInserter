@@ -10,3 +10,17 @@
 	width:12%;
         min-width: 100px;
 }
+
+.navigator {
+    margin: auto;
+    width: 70%;
+    text-align: center;
+}
+
+#errormessage {
+    color: red;
+}
+
+table {
+    width: 80%;
+}

@@ -18,7 +18,7 @@
             <jsp:include page="menu.jsp"/>
         </div>
         <div>
-            <div style="color:red">
+            <div id="errormessage">
                 <h3>${error_message}</h3>
             </div>
             <h1>Import CSV file page</h1>

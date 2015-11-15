@@ -9,12 +9,16 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>View records</title>
+        <link rel='stylesheet' href='main.css' type='text/css'/>
+        <title>View  records</title>
     </head>
     <body>
         <div id="menu">
             <jsp:include page="menu.jsp"/>
         </div>
-        <h1>Hello World!</h1>
+        <div>
+            <h1>View users page</h1>
+            ${users_table}
+        </div>
     </body>
 </html>
