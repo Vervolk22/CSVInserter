@@ -15,7 +15,7 @@ import java.sql.Connection;
 import org.apache.commons.dbutils.DbUtils;
 
 /**
- *
+ * Handles all work with DB.
  * @author andrey
  */
 public abstract class DAO {    
@@ -28,16 +28,23 @@ public abstract class DAO {
     
     private static Connection dbconn;
     
+    /**
+     * Registration of apache derby jdbc driver.
+     */
     static {
         try {
         DriverManager.registerDriver(
-                    new org.apache.derby.jdbc.ClientDriver());
+                new org.apache.derby.jdbc.ClientDriver());
         }
         catch (SQLException e) {
             System.err.print(e.getMessage());
         }
     }
     
+    /**
+     * Preparations to parse the file
+     * @param file File to process.
+     */
     public static synchronized void loadCsvFile(File file) {
         try {
             dbconn = DriverManager.getConnection(DB_URL);
@@ -50,8 +57,17 @@ public abstract class DAO {
         }
     }
     
+    /**
+     * Gets some ordered records from db.
+     * @param page Page to show.
+     * @param recordsByPage Records to show in a single page.
+     * @param orderBy Number, represents the column and asc/desc ordering.
+     * @return ArrayList<User> with "recordsByPage" length, or less if 
+     * its the last page.
+     */
     public static ArrayList<User> getRecords(int page, int recordsByPage, int orderBy) {
         try {
+            // Get string, representing the ordering.
             String part;
             switch (orderBy) {
                 case 2: part = "ID DESC";break;
@@ -68,6 +84,7 @@ public abstract class DAO {
                 default: part = "ID ASC";break;                
             }
             dbconn = DriverManager.getConnection(DB_URL);
+            // Complete the query to the DB.
             readStmt = dbconn.prepareStatement(
                     "SELECT * FROM APP.USERS ORDER BY " + part
                   + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
@@ -76,6 +93,7 @@ public abstract class DAO {
             readStmt.setInt(2, recordsByPage);
             results = readStmt.executeQuery();
             
+            // Get rusults into the ArrayList.
             ArrayList<User> list = new ArrayList();
             User user;
             while (results.next()) {
@@ -98,6 +116,10 @@ public abstract class DAO {
         return null;
     }
     
+    /**
+     * Returns number of records in DB.
+     * @return Number of records in DB.
+     */
     public static int getRecordsCount() {
         try {
             dbconn = DriverManager.getConnection(DB_URL);
@@ -111,7 +133,8 @@ public abstract class DAO {
             return count;
         } catch (SQLException e) {
             System.err.print(e.getMessage());
-            } finally {
+        } 
+        finally {
             DbUtils.closeQuietly(dbconn);
             DbUtils.closeQuietly(readStmt);
             DbUtils.closeQuietly(results);

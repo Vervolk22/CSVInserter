@@ -17,21 +17,33 @@ import org.apache.derby.shared.common.error.
 import org.apache.commons.dbutils.DbUtils;
 
 /**
- *
+ * Process csv file string by string and inserts or updates records in db
  * @author andrey
  */
 public class FileParser {
     private Connection conn;
     private String separator = ",";
     
+    /**
+     * FileParser constructor.
+     * @param conn connection to DB.
+     */
     public FileParser(Connection conn) {
         this.conn = conn;
     }
     
+    /**
+     * Alows to change separator, used in csv file.
+     * @param separator Separator to use.
+     */
     public void setSeparator(String separator) {
         this.separator = separator;
     }
     
+    /**
+     * Gets file and imports records to the DB.
+     * @param file CSV file to process.
+     */
     public void parse(File file) {
         PreparedStatement insertStmt = null;
         PreparedStatement updateStmt = null;
@@ -48,6 +60,8 @@ public class FileParser {
                     "UPDATE APP.USERS SET "
                   + "NAME = ?, SURNAME = ?, EMAIL = ?, PHONENUMBER = ? "
                   + "WHERE LOGIN = ?");
+            // Insert if possible (to the field "Login" was set the unique
+            // constraint
             while ((line = br.readLine()) != null) {
                 array = line.split(separator);
                 insertStmt.setString(1, array[0]);
@@ -57,6 +71,7 @@ public class FileParser {
                 insertStmt.setString(5, array[4]);
                 try {
                     insertStmt.executeUpdate();
+                // Otherwise, update.
                 } catch (DerbySQLIntegrityConstraintViolationException e) {
                     updateStmt.setString(1, array[0]);
                     updateStmt.setString(2, array[1]);

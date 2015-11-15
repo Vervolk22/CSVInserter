@@ -8,7 +8,6 @@ package com.zholudzeu.csv.servlet;
 import java.io.File;
 import java.util.List;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
@@ -30,8 +29,7 @@ public class ImportRecordsServlet extends HttpServlet {
     private final String UPLOAD_DIRECTORY = 
             System.getProperty("user.dir") + "/uploads";
     /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
+     * Processes request to import csv file, if request was POST type
      *
      * @param request servlet request
      * @param response servlet response
@@ -40,16 +38,21 @@ public class ImportRecordsServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // reject if content is not multipart
         if (!ServletFileUpload.isMultipartContent(request)) { 
             processError(request, response);
             return;
         }
         
         try {
+            // receive uploaded files
             List<FileItem> multiparts = new ServletFileUpload(
                 new DiskFileItemFactory()).parseRequest(request);
             for(FileItem item : multiparts){
                 String st = item.getName();
+                // creating file with random name and saving it in uploads
+                // directory. This way was chosen, because file can hold
+                // billions of records, according to the task
                 if(!item.isFormField() && !item.getName().equals("")) {
                     File file = new File(UPLOAD_DIRECTORY + File.separator + Math.random());
                     if (file.exists()) {
@@ -59,10 +62,12 @@ public class ImportRecordsServlet extends HttpServlet {
                         file.getParentFile().mkdirs(); 
                         file.createNewFile();
                         item.write(file);
-                    
+                        
+                        // Importing saved file
                         DAO.loadCsvFile(file);
                     }
                     finally {
+                        // And deleting file after import copmletion
                         file.delete();
                     }
                 } 
@@ -77,17 +82,15 @@ public class ImportRecordsServlet extends HttpServlet {
         }
     }
     
+    /**
+     * Prints little error message and forwards to the import page
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException IOException if an I/O error occurs
+     */
     private void processError(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException{
-        /*response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<h3 style=\"color:red\">");
-            out.println("Something went wrong. Please try again");
-            out.println("</h3>");
-            
-            RequestDispatcher rd = request.getRequestDispatcher("import.jsp");
-            rd.include(request, response);
-        }*/
         request.setAttribute("error_message", 
                 "Something went wrong. Please, try again");
         RequestDispatcher rd = request.getRequestDispatcher("import.jsp");
@@ -130,7 +133,7 @@ public class ImportRecordsServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Receives POST query to process csv file";
     }// </editor-fold>
 
 }
