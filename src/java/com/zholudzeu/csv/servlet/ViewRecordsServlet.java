@@ -7,7 +7,6 @@ package com.zholudzeu.csv.servlet;
 
 import java.util.ArrayList;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -41,6 +40,7 @@ public class ViewRecordsServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, 
             HttpServletResponse response, int page, int orderBy)
             throws ServletException, IOException {
+        RequestDispatcher rd = request.getRequestDispatcher("list.jsp");
         // Generating th row with all sort-allowing urls
         // 1 - sorting by 1st column Ascended
         // 2 - sorting by 1st column Descended, and so on...
@@ -63,6 +63,9 @@ public class ViewRecordsServlet extends HttpServlet {
         // Inserting values into the table
         s += "</tr>";
         ArrayList<User> list = DAO.getRecords(page, RECORDS_BY_PAGE, orderBy);
+        if (list == null) {
+            rd.forward(request, response);
+        }
         for(User usr : list) {
             s += "<tr>";
             s += "<td>" + usr.id + "</td><td>" + usr.name + "</td><td>" + 
@@ -78,7 +81,6 @@ public class ViewRecordsServlet extends HttpServlet {
         
         // Forward to the jsp and set users_table attribute
         request.setAttribute("users_table", s);
-        RequestDispatcher rd = request.getRequestDispatcher("list.jsp");
         rd.forward(request, response);
     }
     
