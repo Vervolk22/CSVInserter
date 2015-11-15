@@ -5,6 +5,7 @@
  */
 package com.zholudzeu.csv.servlet;
 
+import java.util.ArrayList;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -13,6 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.zholudzeu.csv.dal.DAO;
+import com.zholudzeu.csv.dal.User;
+
 /**
  *
  * @author andrey
@@ -20,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "ViewRecordsServlet", urlPatterns = {"/ViewRecordsServlet"})
 public class ViewRecordsServlet extends HttpServlet {
 
+    private static final int RECORDS_BY_PAGE = 30;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -29,11 +34,19 @@ public class ViewRecordsServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest request, 
+            HttpServletResponse response, int page, int orderBy)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
+            ArrayList<User> list = DAO.getRecords(page, RECORDS_BY_PAGE, orderBy);
+            for(User usr : list) {
+                out.println("<div>");
+                out.println(usr.id + " " + usr.name + " " + usr.surname + 
+                        " " + usr.login + " " + usr.email + " " +
+                        usr.phoneNumber);
+                out.println("</div>");
+            }
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -58,7 +71,11 @@ public class ViewRecordsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String s = request.getParameter("page");
+        int page = s == null ? 1 : Integer.parseInt(s);
+        s = request.getParameter("orderBy");
+        int orderBy = s == null ? 1 : Integer.parseInt(s);
+        processRequest(request, response, page, orderBy);
     }
 
     /**
@@ -72,7 +89,7 @@ public class ViewRecordsServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        processRequest(request, response, 1, 1);
     }
 
     /**

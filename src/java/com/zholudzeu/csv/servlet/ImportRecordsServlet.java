@@ -79,7 +79,7 @@ public class ImportRecordsServlet extends HttpServlet {
     
     private void processError(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException{
-        response.setContentType("text/html;charset=UTF-8");
+        /*response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.println("<h3 style=\"color:red\">");
             out.println("Something went wrong. Please try again");
@@ -87,7 +87,11 @@ public class ImportRecordsServlet extends HttpServlet {
             
             RequestDispatcher rd = request.getRequestDispatcher("import.jsp");
             rd.include(request, response);
-        }
+        }*/
+        request.setAttribute("error_message", 
+                "Something went wrong. Please, try again");
+        RequestDispatcher rd = request.getRequestDispatcher("import.jsp");
+        rd.forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
